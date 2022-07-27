@@ -34,6 +34,7 @@ async function getProjectBySlug(projectSlug: string) {
       headers: headers(),
     },
   );
+  console.log(`DL status ${dl.status} ${dl.statusText}`);
   const url = await dl.json();
   if (Deno.args[1] != "no") {
     await fetch(`${url.data}`).then(async (res) => {
@@ -56,72 +57,46 @@ async function getProjectBySlug(projectSlug: string) {
     cmd: ["unzip", "modpack.zip", "-d", "modpack"],
   }).status();
   console.log("Unzip complete");
+
+  // flatten the folder structure
+  if ([...Deno.readDirSync("modpack")].length == 1) {
+    const dir = [...Deno.readDirSync("modpack")][0];
+    for (const file of [...Deno.readDirSync(`modpack/${dir.name}`)]) {
+      await Deno.rename(
+        `modpack/${dir.name}/${file.name}`,
+        `modpack/${file.name}`,
+      );
+    }
+    await Deno.remove(`modpack/${dir.name}`);
+  }
+
   for (const file of Deno.readDirSync("modpack")) {
-    // RAD
-    if (file.name.includes("RAD")) {
-      let forgeName = "";
-      for (const f of Deno.readDirSync(`modpack/${file.name}`)) {
-        if (f.name.includes("forge") && f.name.endsWith(".jar")) {
-          forgeName = f.name;
-        }
-        await Deno.rename(
-          `modpack/${file.name}/${f.name}`,
-          `modpack/${f.name}`,
-        );
-      }
-
-      await writeRun(forgeName);
-      break;
-    }
-    // pixelmon
-    if (file.name == "serverpack" || file.name.includes("StoneBlock")) {
-      let installerName = "";
-      for (const f of Deno.readDirSync(`modpack/${file.name}`)) {
-        if (f.name.includes("installer") && f.name.endsWith(".jar")) {
-          installerName = f.name;
-        }
-        await Deno.rename(
-          `modpack/${file.name}/${f.name}`,
-          `modpack/${f.name}`,
-        );
-      }
-      const name = installerName.replace("-installer", "");
-
-      await installForgeServer(installerName);
-      await writeRun(name);
-      break;
-    }
-    // ATM7 does it this way
-    if (file.name.includes("Server-Files")) {
-      let installerName = "";
-      for (const f of Deno.readDirSync(`modpack/${file.name}`)) {
-        if (f.name.includes("installer") && f.name.endsWith(".jar")) {
-          installerName = f.name;
-        }
-        await Deno.rename(
-          `modpack/${file.name}/${f.name}`,
-          `modpack/${f.name}`,
-        );
-      }
-      await installForgeServer(installerName);
+    if (
+      file.name.toLowerCase().startsWith("forge") &&
+      file.name.includes("-installer") && file.name.endsWith(".jar") &&
+      file.name.includes("1.18")
+    ) {
+      await installForgeServer(file.name);
       await writeRunJVMArgs();
       // remove folder Server-Files
       await Deno.remove(`modpack/${file.name}`);
       break;
     }
-    // NTC2/ATM6
     if (
-      file.name.toLowerCase().startsWith("forge") &&
+      (
+        file.name.toLowerCase().startsWith("forge") ||
+        file.name.startsWith("fabric-server")
+      ) &&
       !file.name.includes("-installer") && file.name.endsWith(".jar")
     ) {
       const jarName = file.name;
       await writeRun(jarName);
       break;
     }
-    // VH
     if (
       file.name.toLowerCase().startsWith("forge") &&
-      file.name.includes("-installer") && file.name.endsWith(".jar")
+      file.name.includes("-installer") && file.name.endsWith(".jar") &&
+      !file.name.includes("1.18")
     ) {
       const jarName = file.name.replace("-installer", "");
       await installForgeServer(file.name);

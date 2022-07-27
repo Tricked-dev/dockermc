@@ -1,6 +1,6 @@
 export const jvm_args = () =>
-  `-Xms\${MODPACK_RAM}G \
--Xmx\${MODPACK_RAM}G \
+  `-Xms\${RAM} \
+-Xmx\${RAM} \
 -Xmn96M \
 -XX:UseSSE=3 \
 -Dsun.rmi.dgc.server.gcInterval=2147483646 \
@@ -26,7 +26,12 @@ export const jvm_args = () =>
 `;
 
 export const run_file = (jarName: string) => `
-java \
-${jvm_args()} \
--jar ${jarName} nogui "$@"
+RAM="\${MODPACK_RAM:=2g}"
+FLAGS="\${OPTS:="${jvm_args()}"}"
+
+if ! [[ "$EULA" = "false" ]]; then
+	echo "eula=true" > eula.txt
+fi
+
+java $FLAGS -jar ${jarName} nogui "$@"
 `;
