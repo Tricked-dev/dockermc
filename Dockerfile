@@ -21,4 +21,4 @@ COPY . .
 
 ENV LEVEL world
 
-CMD ["./start.sh"]
+ENTRYPOINT ["./start.sh"]

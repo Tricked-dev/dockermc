@@ -122,7 +122,7 @@ fi
   if (publoosh) {
     console.log("BUILDING");
     await Deno.run({
-      cmd: `docker build -t ${USERNAME}/${slug} modpack/`.split(" "),
+      cmd: `docker build -t ${slug} modpack/`.split(" "),
     }).status();
     console.log("LISTING IMAGES");
     await Deno.run({
@@ -131,7 +131,12 @@ fi
     }).status();
     console.log("PUSHING");
     await Deno.run({
-      cmd: [`docker`, `push`, `${USERNAME}/${slug}:latest`],
+      cmd: [`docker`, `image`, `tag`, slug, `${USERNAME}/${slug}`],
+      pwd: "modpack",
+    }).status();
+    console.log([`docker`, `push`, `${USERNAME}/${slug}`].join(" "));
+    await Deno.run({
+      cmd: [`docker`, `push`, `${USERNAME}/${slug}`],
       pwd: "modpack",
     }).status();
     console.log("PUSHING README");
@@ -139,11 +144,12 @@ fi
       cmd: [
         `docker`,
         `pushrm`,
-        `${USERNAME}/${slug}:latest`,
+        `${USERNAME}/${slug}`,
+        `-f`,
+        `modpack/README.md`,
         `-s`,
-        `"${summary}"`,
+        `${summary}`,
       ],
-      pwd: "modpack",
     }).status();
   }
 };
