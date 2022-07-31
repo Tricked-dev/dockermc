@@ -41,7 +41,6 @@ const buildPack = async (id: string, version: string, publish?: boolean) => {
     throw new Error(`No server version found for ${id}`);
   }
   console.log(`bootstrapping ${serverVersion.fileName}`);
-  console.log(serverVersion);
   const dl = await fetch(
     `${API_URL}/v1/mods/${id}/files/${serverVersion.serverPackFileId}/download-url`,
     {
@@ -95,6 +94,9 @@ else
     ./run.sh
 fi
   `,
+    {
+      mode: 0o755,
+    },
   );
 
   const { summary, slug, name, logo } = res.data;
@@ -114,26 +116,35 @@ fi
     readme = readme.replaceAll(`@${key}`, value);
   }
   await Deno.writeTextFile(`${PREFIX}/README.md`, readme);
-
   const publoosh = publish != undefined
     ? publish
     : prompt("Publish? (y/n)") === "y";
   if (publoosh) {
+    console.log("BUILDING");
     await Deno.run({
-      cmd: `docker build -t ${slug} modpack/`.split(" "),
+      cmd: `docker build -t ${USERNAME}/${slug} modpack/`.split(" "),
     }).status();
+    console.log("LISTING IMAGES");
     await Deno.run({
       cmd: `docker images`.split(" "),
       pwd: "modpack",
     }).status();
+    console.log("PUSHING");
     await Deno.run({
-      cmd: `docker push ${USERNAME}/${slug}`.split(" "),
+      cmd: [`docker`, `push`, `${USERNAME}/${slug}:latest`],
       pwd: "modpack",
     }).status();
+    console.log("PUSHING README");
     await Deno.run({
-      cmd: `docker pushrm ${USERNAME}/${slug} -s "${summary}"`.split(" "),
+      cmd: [
+        `docker`,
+        `pushrm`,
+        `${USERNAME}/${slug}:latest`,
+        `-s`,
+        `"${summary}"`,
+      ],
       pwd: "modpack",
-    });
+    }).status();
   }
 };
 
