@@ -26,6 +26,8 @@ export const jvm_args = () =>
 `;
 
 export const run_file = (jarName: string) => `
+#!/bin/bash
+
 RAM="\${MODPACK_RAM:=2g}"
 FLAGS="\${OPTS:="${jvm_args()}"}"
 

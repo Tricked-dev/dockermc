@@ -6,46 +6,17 @@ import {
   writeRun,
   writeRunJVMArgs,
 } from "./modules.ts";
-const API_URL = "https://api.curseforge.com";
 
-function headers() {
-  return {
-    "x-api-key": "$2a$10$Kf2u9btbptI1/oXuVxZEf.6j/0F03KOR77vwlZc.xES.EXood2wuC",
-  };
-}
-
-async function getProjectBySlug(projectSlug: string) {
-  const res = await fetch(
-    `${API_URL}/v1/mods/${projectSlug}`,
-    {
-      headers: headers(),
-    },
-  ).then(async (res) => await res.json());
-  const serverVersion = res.data.latestFiles.find((
-    x: { serverPackFileId: any },
-  ) => x.serverPackFileId);
-  if (!serverVersion) {
-    throw new Error(`No server version found for ${projectSlug}`);
-  }
-  console.log(`Downloading file ${serverVersion.fileName}`);
-  const dl = await fetch(
-    `${API_URL}/v1/mods/${projectSlug}/files/${serverVersion.serverPackFileId}/download-url`,
-    {
-      headers: headers(),
-    },
-  );
-  console.log(`DL status ${dl.status} ${dl.statusText}`);
-  const url = await dl.json();
-  if (Deno.args[1] != "no") {
-    await fetch(`${url.data}`).then(async (res) => {
-      const file = await Deno.open("modpack.zip", {
-        write: true,
-        create: true,
-      });
-      const writableStream = writableStreamFromWriter(file);
-      await res.body!.pipeTo(writableStream);
+export async function downloadModPack(url: string) {
+  await fetch(`${url}`).then(async (res) => {
+    const file = await Deno.open("modpack.zip", {
+      write: true,
+      create: true,
     });
-  }
+    const writableStream = writableStreamFromWriter(file);
+    await res.body!.pipeTo(writableStream);
+  });
+
   console.log("Download complete");
   try {
     console.log("removing modpack folder");
@@ -105,6 +76,8 @@ async function getProjectBySlug(projectSlug: string) {
     }
   }
   await writeEULA();
-  // await Deno.chmod("modpack/run.sh", 0o755);
+  await Deno.copyFile("Dockerfile", "modpack/Dockerfile");
 }
-await getProjectBySlug(Deno.args[0]);
+if (import.meta.main) {
+  await downloadModPack(Deno.args[0]);
+}
