@@ -24,9 +24,7 @@ export const jvm_args = () =>
 -XX:+PerfDisableSharedMem \
 -XX:MaxTenuringThreshold=1 \
 `;
-
-export const run_file = (jarName: string) => `
-#!/bin/bash
+const HEADER = `#!/bin/bash
 
 RAM="\${MODPACK_RAM:=2g}"
 FLAGS="\${OPTS:="${jvm_args()}"}"
@@ -34,6 +32,25 @@ FLAGS="\${OPTS:="${jvm_args()}"}"
 if ! [[ "$EULA" = "false" ]]; then
 	echo "eula=true" > eula.txt
 fi
-
-java $FLAGS -jar ${jarName} nogui "$@"
 `;
+
+export const run_file = (jarName: string) =>
+  `${HEADER}
+
+java $FLAGS -jar ${jarName} nogui "$@"`;
+
+export const java18 = async () => {
+  const run = await Deno.readTextFile("modpack/run.sh");
+  const res = run.match(/@libraries.*txt/g)?.[0];
+  if (!res) return;
+
+  await Deno.writeTextFile(
+    "modpack/run.sh",
+    `${HEADER}
+
+java $FLAGS ${res} "$@"`,
+    { mode: 0o755 },
+  );
+
+  await Deno.remove("modpack/user_jvm_args.txt");
+};

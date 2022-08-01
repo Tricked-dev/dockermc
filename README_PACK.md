@@ -12,13 +12,9 @@
 
 `docker run -d --name minecraft-server -p 25565:25565 -e EULA=true tricked/@slug`
 
-## Compose
-
-You can use docker-compose to run this modpack or you can use docker with the following command:
-
 ### Compose
 
-You can use docker-compose to run this modpack or you can use docker with the following command:
+You can run the modpack with the following `docker-compose.yml` file
 
 ```yml
 version: "3.8"
@@ -32,6 +28,8 @@ services:
     volumes:
       - ./data:/data
 ```
+
+starting `docker-compose up -d` will start the server in the background keep in mind it can take several minutes to install and start.
 
 ## Info
 

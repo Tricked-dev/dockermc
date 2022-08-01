@@ -148,7 +148,7 @@ fi
         `-f`,
         `modpack/README.md`,
         `-s`,
-        `${summary}`,
+        `${summary.slice(0, 100)}`,
       ],
     }).status();
   }

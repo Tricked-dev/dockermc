@@ -1,11 +1,7 @@
 // some code is forked from https://github.com/ScuroGuardiano/curse-modpack-downloader/blob/master/cli.js
 import { writableStreamFromWriter } from "https://deno.land/std@0.149.0/streams/mod.ts";
-import {
-  installForgeServer,
-  writeEULA,
-  writeRun,
-  writeRunJVMArgs,
-} from "./modules.ts";
+import { installForgeServer, writeEULA, writeRun } from "./modules.ts";
+import { java18 } from "./utils.ts";
 
 export async function downloadModPack(url: string) {
   await fetch(`${url}`).then(async (res) => {
@@ -21,7 +17,7 @@ export async function downloadModPack(url: string) {
   try {
     console.log("removing modpack folder");
     await Deno.remove("./modpack", { recursive: true });
-  } catch (e) {
+  } catch (_e) {
     console.log("No modpack folder ");
   }
   await Deno.run({
@@ -48,9 +44,7 @@ export async function downloadModPack(url: string) {
       file.name.includes("1.18")
     ) {
       await installForgeServer(file.name);
-      await writeRunJVMArgs();
-      // remove folder Server-Files
-      await Deno.remove(`modpack/${file.name}`);
+      await java18();
       break;
     }
     if (

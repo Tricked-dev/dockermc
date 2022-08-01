@@ -1,3 +1,30 @@
 [darkrpg]
 id = "515345"
 jvm = "17"
+[ntc2]
+id="495500"
+jvm="8"
+[atm7]
+id="426926"
+jvm="17"
+[atm6]
+id="381671"
+jvm="8"
+[atMagic]
+id="500199"
+jvm="8"
+[vaultHunters]
+id="458201"
+jvm="8"
+[rogueDungeons]
+id="289267"
+jvm="8"
+[sevtech_ages]
+id="268208"
+jvm="8"
+[one_thousend_years]
+id="435888"
+jvm="8"
+[all_in_one]
+id="439293"
+jvm="8"
