@@ -34,9 +34,9 @@ then go into that folder and run `./start.sh` or make a local image and test it 
 - [ ] Medieval MC [FORGE] (forge installs but pack errors on mixin configs)
 - [ ] Mustard Virus by Forge Labs (no server pack)
 - [ ] Mineshafts & Monsters (forbidden)
-- [x] One Thousand Years After the Apocalypse (435888)
+- [x] One Thousand Years After the Apocalypse
 - [ ] Demon Slayers Unleashed (how does anyone run this)
-- [x] All the Magic Spellbound (500199)
-- [x] All in One (439293)
-- [x] Dark RPG (515345)
+- [x] All the Magic Spellbound
+- [x] All in One
+- [x] Dark RPG
 - [ ] All of Fabric 5 - AOF5 (server starter being iffy will do later)

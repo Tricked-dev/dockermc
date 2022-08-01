@@ -70,7 +70,6 @@ export async function downloadModPack(url: string) {
     }
   }
   await writeEULA();
-  await Deno.copyFile("Dockerfile", "modpack/Dockerfile");
 }
 if (import.meta.main) {
   await downloadModPack(Deno.args[0]);
