@@ -1,15 +1,21 @@
 // deno-lint-ignore-file no-explicit-any
-const API_URL = "https://api.curseforge.com";
-const PREFIX = "modpack";
-const USERNAME = "tricked";
+const API_URL = Deno.env.get("FLAME_API") || "https://api.curseforge.com";
+const PREFIX = Deno.env.get("MODPACK_DIR") || "modpack";
+const USERNAME = Deno.env.get("DOCKER_NAME") || "tricked";
 
 function headers() {
   return {
+    // You must change this if you are forking the application
     "x-api-key": "$2a$10$Kf2u9btbptI1/oXuVxZEf.6j/0F03KOR77vwlZc.xES.EXood2wuC",
   };
 }
 
-const buildPack = async (id: string, version: string, publish?: boolean) => {
+export const buildPack = async (
+  id: string,
+  version: string,
+  publish?: boolean,
+  current?: string,
+): Promise<string | boolean> => {
   const res = await fetch(
     `${API_URL}/v1/mods/${id}`,
     {
@@ -41,6 +47,9 @@ const buildPack = async (id: string, version: string, publish?: boolean) => {
     throw new Error(`No server version found for ${id}`);
   }
   console.log(`bootstrapping ${serverVersion.fileName}`);
+  if (serverVersion.fileDate == current) {
+    return false;
+  }
   const dl = await fetch(
     `${API_URL}/v1/mods/${id}/files/${serverVersion.serverPackFileId}/download-url`,
     {
@@ -122,22 +131,22 @@ fi
   if (publoosh) {
     console.log("BUILDING");
     await Deno.run({
-      cmd: `docker build -t ${slug} modpack/`.split(" "),
+      cmd: `docker build -t ${slug} ${PREFIX}/`.split(" "),
     }).status();
     console.log("LISTING IMAGES");
     await Deno.run({
       cmd: `docker images`.split(" "),
-      pwd: "modpack",
+      pwd: PREFIX,
     }).status();
     console.log("PUSHING");
     await Deno.run({
       cmd: [`docker`, `image`, `tag`, slug, `${USERNAME}/${slug}`],
-      pwd: "modpack",
+      pwd: PREFIX,
     }).status();
     console.log([`docker`, `push`, `${USERNAME}/${slug}`].join(" "));
     await Deno.run({
       cmd: [`docker`, `push`, `${USERNAME}/${slug}`],
-      pwd: "modpack",
+      pwd: PREFIX,
     }).status();
     console.log("PUSHING README");
     await Deno.run({
@@ -146,12 +155,13 @@ fi
         `pushrm`,
         `${USERNAME}/${slug}`,
         `-f`,
-        `modpack/README.md`,
+        `${PREFIX}/README.md`,
         `-s`,
         `${summary.slice(0, 100)}`,
       ],
     }).status();
   }
+  return serverVersion.fileDate;
 };
 
 if (import.meta.main) {

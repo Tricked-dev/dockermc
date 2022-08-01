@@ -1,4 +1,4 @@
-<img align="right" src="@icon" height="150px" style=" border-radius: 8px;">
+<a href="https://www.curseforge.com/minecraft/modpacks/@slug"><img align="right" src="@icon" height="150px" style=" border-radius: 8px;"></a>
 
 # @name
 
@@ -6,11 +6,11 @@
 
 @links
 
-# Running
+## Running
 
-## Docker
+### Docker
 
-`docker run -d --name minecraft-server -p 25565:25565 -e EULA=true tricked/@slug`
+`docker run -d --name minecraft-server -p 25565:25565 -e EULA=true -e MODPACK_RAM=4g tricked/@slug`
 
 ### Compose
 
@@ -31,9 +31,18 @@ services:
 
 starting `docker-compose up -d` will start the server in the background keep in mind it can take several minutes to install and start.
 
+### Environment Variables
+
+```
+OPTS: Change the default jvm flags
+MODPACK_RAM: Change the default ram for the server this is overwritten by 'OPTS'
+```
+
 ## Info
 
 modpack updated timestamp @date - id @id
+
+curseforge link: <https://www.curseforge.com/minecraft/modpacks/@slug>
 
 ## Repository
 

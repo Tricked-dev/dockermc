@@ -2,6 +2,15 @@
 
 creating docker images for minecraft mods.
 
+## Requesting new modpacks
+
+Just create a issue with the curseforge link and the modpack name in the title.
+
+## Submitting new modpacks
+
+run `deno run -A bootstrap.ts <modpackid> [jvm version (8 default)]`
+then go into that folder and run `./start.sh` or make a local image and test it out that way
+
 ## View the images here
 
 [On my DockerHub](https://hub.docker.com/u/tricked)
